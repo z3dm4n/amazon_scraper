@@ -11,19 +11,19 @@
 # */10 * * * * cd /path/to/amazon_scraper && ./amazon_scraper.py --json &> /dev/null
 #
 # Author: z3dm4n
-# Mail: erik__at__z3dm4n.net
-# Date: 01/01/18
+# Version: 0.1.1
 #
 ##
 
 import csv
 import json
 import os
-import requests
+import random
 import smtplib
 import sys
-from lxml import html
 from time import sleep
+from lxml import html
+import requests
 
 def parse(url):
     # https://gist.github.com/scrapehero/0b8b4aeea00ff3abf3bc72a9e9d26849
@@ -31,8 +31,8 @@ def parse(url):
             Gecko/20100101 Firefox/57.0'}
     page = requests.get(url, headers=headers)
 
-    for i in range(5):
-        sleep(1)
+    for i in range(20):
+        sleep(random.randint(1, 3))
         try:
             doc = html.fromstring(page.content)
             XPATH_NAME = '//h1[@id="title"]//text()'
@@ -76,7 +76,7 @@ def send(url):
     PASSWD = ''
     FROM = 'Firstname Lastname <info@example.com>'
     TO = ['myaddr@gmail.com'] # must be a list
-    SUBJECT = 'Amazon-Preisalarm'
+    SUBJECT = 'amazon price alarm'
     text = url
 
     # Prepare actual message
@@ -95,172 +95,172 @@ def send(url):
         print('Error: Failed to send mail.')
         sys.exit(1)
 
-def read_asin_from_csv(csvInputFile):
-    f = open(csvInputFile, 'r', newline='')
-    csvReader = csv.DictReader(f, delimiter=';')
-    print('Reading ' + csvInputFile + '...')
-    asinList = []
-    for row in csvReader:
-        asinList.append(row['ASIN'])
+def read_asin_from_csv(csv_input_file):
+    f = open(csv_input_file, 'r', newline='')
+    csv_reader = csv.DictReader(f, delimiter=';')
+    print('Reading ' + csv_input_file + '...')
+    asin_list = []
+    for row in csv_reader:
+        asin_list.append(row['ASIN'])
     f.close()
-    return asinList
+    return asin_list
 
-def write_csv_header(csvOutputFile):
-    if os.path.isfile(csvOutputFile):
-        os.remove(csvOutputFile)
-    f = open(csvOutputFile, 'w', newline='')
+def write_csv_header(csv_output_file):
+    if os.path.isfile(csv_output_file):
+        os.remove(csv_output_file)
+    f = open(csv_output_file, 'w', newline='')
     fieldnames = ['NAME',
                   'SALE_PRICE',
                   'CATEGORY',
                   'ORIGINAL_PRICE',
                   'AVAILABILITY',
                   'URL']
-    csvWriter = csv.DictWriter(f, delimiter=';', fieldnames=fieldnames)
-    csvWriter.writeheader()
-    print('Writing CSV header to ' + csvOutputFile + '...')
+    csv_writer = csv.DictWriter(f, delimiter=';', fieldnames=fieldnames)
+    csv_writer.writeheader()
+    print('Writing CSV header to ' + csv_output_file + '...')
     f.close()
 
-def write_csv(csvOutputFile, data):
-    f = open(csvOutputFile, 'a', newline='')
+def write_csv(csv_output_file, data):
+    f = open(csv_output_file, 'a', newline='')
     fieldnames = ['NAME',
                   'SALE_PRICE',
                   'CATEGORY',
                   'ORIGINAL_PRICE',
                   'AVAILABILITY',
                   'URL']
-    csvWriter = csv.DictWriter(f, delimiter=';', fieldnames=fieldnames)
-    csvWriter.writerow({'NAME': data['NAME'],
-                        'SALE_PRICE': data['SALE_PRICE'],
-                        'CATEGORY': data['CATEGORY'],
-                        'ORIGINAL_PRICE': data['ORIGINAL_PRICE'],
-                        'AVAILABILITY': data['AVAILABILITY'],
-                        'URL': data['URL']})
-    print('Writing to ' + csvOutputFile + '...')
+    csv_writer = csv.DictWriter(f, delimiter=';', fieldnames=fieldnames)
+    csv_writer.writerow({'NAME': data['NAME'],
+                         'SALE_PRICE': data['SALE_PRICE'],
+                         'CATEGORY': data['CATEGORY'],
+                         'ORIGINAL_PRICE': data['ORIGINAL_PRICE'],
+                         'AVAILABILITY': data['AVAILABILITY'],
+                         'URL': data['URL']})
+    print('Writing to ' + csv_output_file + '...')
     f.close()
 
-def read_wishprice_from_csv(csvInputFile):
-    f = open(csvInputFile, 'r')
-    print('Reading WISH_PRICE from ' + csvInputFile + '...')
-    wishList = []
-    csvReader = csv.DictReader(f, delimiter=';')
-    for row in csvReader:
-        wishList.append(row['WISH_PRICE'].replace(',', '.'))
+def read_wishprice_from_csv(csv_input_file):
+    f = open(csv_input_file, 'r')
+    print('Reading WISH_PRICE from ' + csv_input_file + '...')
+    wish_list = []
+    csv_reader = csv.DictReader(f, delimiter=';')
+    for row in csv_reader:
+        wish_list.append(row['WISH_PRICE'].replace(',', '.'))
         # replaces , with . in WISH_PRICE
     f.close()
-    return wishList
+    return wish_list
 
-def read_saleprice_from_csv(csvOutputFile):
-    f = open(csvOutputFile, 'r')
-    print('Reading SALE_PRICE from ' + csvOutputFile + '...')
-    saleList = []
-    csvReader = csv.DictReader(f, delimiter=';')
-    for row in csvReader:
-        saleList.append(row['SALE_PRICE'][4:].replace(',', '.'))
+def read_saleprice_from_csv(csv_output_file):
+    f = open(csv_output_file, 'r')
+    print('Reading SALE_PRICE from ' + csv_output_file + '...')
+    sale_list = []
+    csv_reader = csv.DictReader(f, delimiter=';')
+    for row in csv_reader:
+        sale_list.append(row['SALE_PRICE'][4:].replace(',', '.'))
         #removes EUR from SALE_Price and replaces , with .
     f.close()
-    return saleList
+    return sale_list
 
-def read_asin_from_json(jsonInputFile):
-    f = open(jsonInputFile, 'r')
-    print('Reading ' + jsonInputFile + '...')
-    asinList = []
-    jsonReader = json.load(f)
-    for row in jsonReader:
-        asinList.append(row['ASIN'])
+def read_asin_from_json(json_input_file):
+    f = open(json_input_file, 'r')
+    print('Reading ' + json_input_file + '...')
+    asin_list = []
+    json_reader = json.load(f)
+    for row in json_reader:
+        asin_list.append(row['ASIN'])
     f.close()
-    return asinList
+    return asin_list
 
-def write_json(jsonOutputFile, extractedData):
-    f = open(jsonOutputFile, 'w', newline='')
-    json.dump(extractedData, f, indent=4)
-    print('Writing to ' + jsonOutputFile + '...')
+def write_json(json_output_file, extracted_data):
+    f = open(json_output_file, 'w', newline='')
+    json.dump(extracted_data, f, indent=4)
+    print('Writing to ' + json_output_file + '...')
     f.close()
 
-def read_wishprice_from_json(jsonInputFile):
-    f = open(jsonInputFile, 'r')
-    print('Reading WISH_PRICE from ' + jsonInputFile + '...')
-    wishList = []
-    jsonReader = json.load(f)
-    for row in jsonReader:
-        wishList.append(row['WISH_PRICE'].replace(',', '.'))
+def read_wishprice_from_json(json_input_file):
+    f = open(json_input_file, 'r')
+    print('Reading WISH_PRICE from ' + json_input_file + '...')
+    wish_list = []
+    json_reader = json.load(f)
+    for row in json_reader:
+        wish_list.append(row['WISH_PRICE'].replace(',', '.'))
         # replaces , with . in WISH_PRICE
     f.close()
-    return wishList
+    return wish_list
 
-def read_saleprice_from_json(jsonOutputFile):
-    f = open(jsonOutputFile, 'r')
-    print('Reading SALE_PRICE from ' + jsonOutputFile + '...')
-    saleList = []
-    jsonReader = json.load(f)
-    for row in jsonReader:
-        saleList.append(row['SALE_PRICE'][4:].replace(',', '.'))
+def read_saleprice_from_json(json_output_file):
+    f = open(json_output_file, 'r')
+    print('Reading SALE_PRICE from ' + json_output_file + '...')
+    sale_list = []
+    json_reader = json.load(f)
+    for row in json_reader:
+        sale_list.append(row['SALE_PRICE'][4:].replace(',', '.'))
         #removes EUR from SALE_Price and replaces , with .
     f.close()
-    return saleList
+    return sale_list
 
-def compare(inputFile, outputFile, urlList):
+def compare(input_file, output_file, url_list):
     if sys.argv[1] == '--csv':
-        wishList = read_wishprice_from_csv(inputFile)
-        saleList = read_saleprice_from_csv(outputFile)
+        wish_list = read_wishprice_from_csv(input_file)
+        sale_list = read_saleprice_from_csv(output_file)
         print('Comparing prices...')
-        for (wishPrice, salePrice, url) in zip(wishList, saleList, urlList):
+        for (wish_price, sale_price, url) in zip(wish_list, sale_list, url_list):
             # Fixing numbers >= 1.000,00
             # https://stackoverflow.com/questions/7106417/convert-decimal-mark
-            if float(salePrice.replace(".", "", salePrice.count(".") -1)) <= \
-                    float(wishPrice.replace(".", "", wishPrice.count(".") -1)):
+            if float(sale_price.replace(".", "", sale_price.count(".") -1)) <= \
+                    float(wish_price.replace(".", "", wish_price.count(".") -1)):
                 send(url)
     elif sys.argv[1] == '--json':
-        wishList = read_wishprice_from_json(inputFile)
-        saleList = read_saleprice_from_json(outputFile)
+        wish_list = read_wishprice_from_json(input_file)
+        sale_list = read_saleprice_from_json(output_file)
         print('Comparing prices...')
-        for (wishPrice, salePrice, url) in zip(wishList, saleList, urlList):
+        for (wish_price, sale_price, url) in zip(wish_list, sale_list, url_list):
             # Fixing numbers >= 1.000,00
             # https://stackoverflow.com/questions/7106417/convert-decimal-mark
-            if float(salePrice.replace(".", "", salePrice.count(".") -1)) <= \
-                    float(wishPrice.replace(".", "", wishPrice.count(".") -1)):
+            if float(sale_price.replace(".", "", sale_price.count(".") -1)) <= \
+                    float(wish_price.replace(".", "", wish_price.count(".") -1)):
                 send(url)
 
 def main():
-    csvInputFile = 'amazon_input.csv'
-    csvOutputFile = 'amazon_output.csv'
-    jsonInputFile = 'amazon_input.json'
-    jsonOutputFile = 'amazon_output.json'
+    csv_input_file = 'amazon_input.csv'
+    csv_output_file = 'amazon_output.csv'
+    json_input_file = 'amazon_input.json'
+    json_output_file = 'amazon_output.json'
 
     if len(sys.argv) != 2:
         print('Error: usage: {0} --json|--csv'.format(sys.argv[0]))
         sys.exit(1)
     elif sys.argv[1] == '--csv':
         ##CSV part:
-        if not csvInputFile or not os.path.isfile(csvInputFile):
-            print('Error ' + csvInputFile + ' is missing.')
+        if not csv_input_file or not os.path.isfile(csv_input_file):
+            print('Error ' + csv_input_file + ' is missing.')
             sys.exit(1)
-        write_csv_header(csvOutputFile)
-        urlList = []
-        asinList = read_asin_from_csv(csvInputFile)
-        for asin in asinList:
+        write_csv_header(csv_output_file)
+        url_list = []
+        asin_list = read_asin_from_csv(csv_input_file)
+        for asin in asin_list:
             url = 'http://www.amazon.de/dp/' + asin
-            urlList.append(url)
+            url_list.append(url)
             print('Processing: ' + url)
             data = parse(url)
-            write_csv(csvOutputFile, data)
+            write_csv(csv_output_file, data)
             sleep(1)
-        compare(csvInputFile, csvOutputFile, urlList)
+        compare(csv_input_file, csv_output_file, url_list)
     elif sys.argv[1] == '--json':
         ##Json part:
-        if not jsonInputFile or not os.path.isfile(jsonInputFile):
-            print('Error ' + jsonInputFile + ' is missing.')
+        if not json_input_file or not os.path.isfile(json_input_file):
+            print('Error ' + json_input_file + ' is missing.')
             sys.exit(1)
-        urlList = []
-        extractedData = []
-        asinList = read_asin_from_json(jsonInputFile)
-        for asin in asinList:
+        url_list = []
+        extracted_data = []
+        asin_list = read_asin_from_json(json_input_file)
+        for asin in asin_list:
             url = 'http://www.amazon.de/dp/' + asin
-            urlList.append(url)
+            url_list.append(url)
             print('Processing: ' + url)
-            extractedData.append(parse(url))
-            write_json(jsonOutputFile, extractedData)
+            extracted_data.append(parse(url))
+            write_json(json_output_file, extracted_data)
             sleep(1)
-        compare(jsonInputFile, jsonOutputFile, urlList)
+        compare(json_input_file, json_output_file, url_list)
     else:
         print('Error: usage: {0} --json|--csv'.format(sys.argv[0]))
         sys.exit(1)
