@@ -11,7 +11,7 @@
 # */10 * * * * cd /path/to/amazon_scraper && ./amazon_scraper.py --json &> /dev/null
 #
 # Author: z3dm4n
-# Version: 0.1.1
+# Version: 0.1.2
 #
 ##
 
@@ -27,8 +27,32 @@ import requests
 
 def parse(url):
     # https://gist.github.com/scrapehero/0b8b4aeea00ff3abf3bc72a9e9d26849
-    headers = {'User-Agent': 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:57.0) \
-            Gecko/20100101 Firefox/57.0'}
+    user_agent_list = ['Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:61.0) \
+                        Gecko/20100101 Firefox/61.0',
+                       'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 \
+                        (KHTML, like Gecko) Chrome/66.0.3359.117 Safari/537.36',
+                       'Mozilla/5.0 (X11; Linux x86_64; rv:61.0) \
+                        Gecko/20100101 Firefox/61.0',
+                       'Mozilla/5.0 (Windows NT 10.0; Win64; x64) \
+                        AppleWebKit/537.36 (KHTML, like Gecko) \
+                        Chrome/60.0.3112.113 Safari/537.36',
+                       'Mozilla/5.0 (Windows NT 10.0; Win64; x64) \
+                        AppleWebKit/537.36 (KHTML, like Gecko) \
+                        Chrome/63.0.3239.132 Safari/537.36',
+                       'Mozilla/5.0 (Windows NT 10.0; Win64; x64) \
+                        AppleWebKit/537.36 (KHTML, like Gecko) \
+                        Chrome/66.0.3359.117 Safari/537.36',
+                       'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_5) \
+                        AppleWebKit/603.3.8 (KHTML, like Gecko) Version/10.1.2 \
+                        Safari/603.3.8',
+                       'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_5) \
+                        AppleWebKit/537.36 (KHTML, like Gecko) Chrome/61.0.3163.100 \
+                        Safari/537.36',
+                       'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_6) \
+                        AppleWebKit/537.36 (KHTML, like Gecko) Chrome/62.0.3202.94 \
+                        Safari/537.36']
+    user_agent = random.choice(user_agent_list)
+    headers = {'User-Agent': user_agent}
     page = requests.get(url, headers=headers)
 
     for i in range(20):
@@ -243,7 +267,6 @@ def main():
             print('Processing: ' + url)
             data = parse(url)
             write_csv(csv_output_file, data)
-            sleep(1)
         compare(csv_input_file, csv_output_file, url_list)
     elif sys.argv[1] == '--json':
         ##Json part:
@@ -259,7 +282,6 @@ def main():
             print('Processing: ' + url)
             extracted_data.append(parse(url))
             write_json(json_output_file, extracted_data)
-            sleep(1)
         compare(json_input_file, json_output_file, url_list)
     else:
         print('Error: usage: {0} --json|--csv'.format(sys.argv[0]))
